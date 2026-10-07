@@ -22,7 +22,7 @@ A partir da pasta `T2`:
 
 ```bash
 # executar com uma entrada
-python3 src/main.py < entrada.txt
+python3 src/main.py < dados/entrada.txt
 
 # exemplo
 printf '3\nrivest\nshamir\nadleman\n' | python3 src/main.py

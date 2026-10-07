@@ -165,7 +165,13 @@ LETRAS = 26
 
 
 def indice(c):
+    """Converte a letra no índice do vértice: 'a' -> 0, ..., 'z' -> 25."""
     return ord(c) - ord('a')
+
+
+def letra(v):
+    """Converte o índice do vértice de volta para a letra: 0 -> 'a', ..., 25 -> 'z'."""
+    return chr(ord('a') + v)
 
 
 def construir_grafo(nomes):
@@ -201,7 +207,10 @@ def resolver(nomes):
     if not topological.has_order():
         return "Impossible"
 
-    return "".join(chr(ord('a') + v) for v in topological.order)
+    alfabeto = []
+    for v in topological.order:
+        alfabeto.append(letra(v))
+    return "".join(alfabeto)
 
 
 def main():
