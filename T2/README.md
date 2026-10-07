@@ -8,9 +8,9 @@ Dada uma lista de nomes, decidir se existe uma ordem para as 26 letras que torne
 
 ## Integrantes
 
-- _nome do integrante_
-- _nome do integrante_
-- _nome do integrante_
+- Samuel Ribeiro Benicio - 2310281
+- Adriel Medeiros Lins – 2013246
+- Manoel Sergio Costa Lima - 2422973
 
 ## Linguagem
 
