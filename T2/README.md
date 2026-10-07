@@ -73,7 +73,7 @@ Nenhuma classe teve a lógica alterada; foram removidos apenas trechos não usad
 
 ## Evidência do `Accepted`
 
-- **Submissão:** _link da submissão no Codeforces_
+- **Submissão:** [393638964](https://codeforces.com/problemset/submission/510/393638964) — `Accepted`, Python 3, 62 ms, 800 KB
 - **Captura:** [`evidencias/accepted.png`](evidencias/accepted.png)
 
 ## Uso de IA
