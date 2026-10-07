@@ -40,7 +40,7 @@ Referência: `algs4-py/algs4`.
 |---|---|
 | `indice(c)` | Converte a letra em índice (`a` → 0, …, `z` → 25) |
 | `construir_grafo(nomes)` | Compara nomes consecutivos, cria as arestas e detecta o caso de prefixo (retorna `None`) |
-| `resolver(nomes)` | Decide entre `Impossible` e a ordem topológica, e converte índices em letras |
+| `resolver(nomes)` | Decide entre `Impossible` e a ordem topológica, e monta a saída: letras restritas na ordem topológica, depois as livres em ordem alfabética |
 | `main()` | Lê a entrada e imprime a resposta |
 
 Em `construir_grafo`, uma matriz `existe[26][26]` impede arestas repetidas, conforme previsto nos marcos 1 e 3. Essa verificação fica fora de `Digraph` para não alterar a classe de referência. Sem ela a resposta continuaria correta, pois arestas paralelas não criam ciclos nem mudam a ordem topológica; a matriz apenas mantém o grafo simples.
@@ -50,7 +50,8 @@ Em `construir_grafo`, uma matriz `existe[26][26]` impede arestas repetidas, conf
 - **Linguagem:** o Marco 3 citava inicialmente `algs4-java`. A solução final usa `algs4-py`, que possui as mesmas classes (`Digraph`, `DirectedCycle`, `DepthFirstOrder`, `Topological`) com código bem menor. O Marco 3 foi atualizado para referenciar `algs4-py`.
 - **`Stack`:** no `algs4-py`, `DepthFirstOrder` usa `collections.deque` para guardar a pós-ordem, e `reversePost()` a percorre ao contrário. Não há classe `Stack` separada.
 - **DFS em vez de Kahn:** o Marco 1 mencionava a possibilidade de usar BFS/Kahn. A escolha final foi a DFS, pois `Topological` do `algs4` é baseada em DFS e reúne em uma única classe a detecção de ciclo e a ordenação.
-- **Saída da instância do Marco 3:** o rastreamento do Marco 3 apresentou *uma* ordem válida (`bdacefgh…`). A implementação imprime a pós-ordem reversa real, `zyxwvutsrqponmlkjihgfedbac`. Ambas respeitam `b -> a`, `d -> a` e `a -> c`; o problema aceita qualquer permutação válida.
+- **Saída da instância do Marco 3:** o rastreamento do Marco 3 apresentou *uma* ordem válida (`bdacefgh…`). A implementação imprime `dbacefghijklmnopqrstuvwxyz`. Ambas respeitam `b -> a`, `d -> a` e `a -> c`; o problema aceita qualquer permutação válida.
+- **Saída com letras restritas primeiro:** a pós-ordem reversa coloca as letras isoladas antes e em ordem invertida (ex.: `zyxwvutrsq…a` no exemplo 1). Para uma saída mais legível, `resolver` mantém da ordem topológica apenas as letras que aparecem em alguma aresta e acrescenta as demais em ordem alfabética (ex.: `rsabcd…`). Isso é válido porque toda aresta liga duas letras restritas, cuja ordem relativa é preservada, e as letras livres não têm restrições. As classes de referência não foram alteradas.
 - **Ordem das adjacências:** `Bag` insere no início da lista, então `adj(v)` é percorrida na ordem inversa de inserção. Isso altera qual ordem válida é produzida, mas não a correção.
 
 ## 4. Testes
@@ -66,19 +67,19 @@ Como a resposta não é única, o verificador não compara com uma saída fixa. 
 
 | # | Caso | Esperado | Saída obtida | Resultado |
 |---|---|---|---|---|
-| 1 | Exemplo 1 do enunciado | válido | `zyxwvutrsqponmlkjihgfedcba` | OK |
+| 1 | Exemplo 1 do enunciado | válido | `rsabcdefghijklmnopqtuvwxyz` | OK |
 | 2 | Exemplo 2 do enunciado (ciclo) | `Impossible` | `Impossible` | OK |
-| 3 | Exemplo 3 do enunciado | válido | `zyxwvutsrqpoljhgnefikdmbca` | OK |
-| 4 | Exemplo 4 do enunciado (prefixos válidos) | válido | `zyxwvutsrqpnmlkjihfedcboga` | OK |
-| 5 | Instância dos marcos 1 e 3 | válido | `zyxwvutsrqponmlkjihgfedbac` | OK |
-| 6 | Um único nome | válido | `zyxwvutsrqponmlkjihgfedcba` | OK |
+| 3 | Exemplo 3 do enunciado | válido | `pgnefikdmbcahjloqrstuvwxyz` | OK |
+| 4 | Exemplo 4 do enunciado (prefixos válidos) | válido | `cbogadefhijklmnpqrstuvwxyz` | OK |
+| 5 | Instância dos marcos 1 e 3 | válido | `dbacefghijklmnopqrstuvwxyz` | OK |
+| 6 | Um único nome | válido | `abcdefghijklmnopqrstuvwxyz` | OK |
 | 7 | Prefixo inválido (`abc`, `ab`) | `Impossible` | `Impossible` | OK |
-| 8 | Prefixo válido (`ab`, `abc`) | válido | `zyxwvutsrqponmlkjihgfedcba` | OK |
+| 8 | Prefixo válido (`ab`, `abc`) | válido | `abcdefghijklmnopqrstuvwxyz` | OK |
 | 9 | Ciclo de tamanho 2 | `Impossible` | `Impossible` | OK |
 | 10 | Ciclo de tamanho 3 | `Impossible` | `Impossible` | OK |
-| 11 | Arestas repetidas | válido | `zxywvutsrqponmlkjihgfedcab` | OK |
+| 11 | Arestas repetidas | válido | `xyabcdefghijklmnopqrstuvwz` | OK |
 | 12 | Cadeia com as 26 letras | válido | `zyxwvutsrqponmlkjihgfedcba` | OK |
-| 13 | Diferença após prefixo comum longo | válido | `zyxwvutsrqponmlkjihgfedcba` | OK |
+| 13 | Diferença após prefixo comum longo | válido | `zyabcdefghijklmnopqrstuvwx` | OK |
 
 **Resultado:** 13 de 13 casos corretos.
 

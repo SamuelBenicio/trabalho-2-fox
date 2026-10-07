@@ -2,7 +2,7 @@
 Fox And Names - Codeforces 510C
 https://codeforces.com/problemset/problem/510/C
 
-Execução:  python3 src/main.py < entrada.txt
+Execução:  python3 src/main.py < dados/entrada.txt
 
 As classes Node, LinkIterator, Bag, Digraph, DirectedCycle, DepthFirstOrder e
 Topological são cópias das implementações de referência de algs4-py, reunidas
@@ -207,9 +207,22 @@ def resolver(nomes):
     if not topological.has_order():
         return "Impossible"
 
+    # Letras restritas: as que aparecem em alguma aresta.
+    restrita = [False] * LETRAS
+    for v in range(LETRAS):
+        for w in g.adj[v]:
+            restrita[v] = True
+            restrita[w] = True
+
+    # Primeiro as letras restritas, na ordem topológica (preserva as arestas);
+    # depois as letras livres, em ordem alfabética (não têm restrições).
     alfabeto = []
     for v in topological.order:
-        alfabeto.append(letra(v))
+        if restrita[v]:
+            alfabeto.append(letra(v))
+    for v in range(LETRAS):
+        if not restrita[v]:
+            alfabeto.append(letra(v))
     return "".join(alfabeto)
 
 

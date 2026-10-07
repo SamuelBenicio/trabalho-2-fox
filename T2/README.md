@@ -47,7 +47,54 @@ Existe resposta se e somente se o grafo de precedência é um **DAG** (não poss
 
 1. Comparar nomes consecutivos e criar as arestas; se um nome aparece antes de um prefixo seu, responder `Impossible`.
 2. Detectar ciclo com DFS (`DirectedCycle`, vetor `on_stack`); se houver, responder `Impossible`.
-3. Caso contrário, obter a pós-ordem reversa da DFS (`DepthFirstOrder`) e convertê-la em letras.
+3. Caso contrário, obter a pós-ordem reversa da DFS (`DepthFirstOrder`).
+4. Montar a saída: primeiro as letras que aparecem em alguma aresta, na ordem topológica; depois as letras livres, em ordem alfabética.
+
+### Fluxo de chamadas
+
+```text
+main()
+└── resolver(nomes)
+    ├── construir_grafo(nomes)
+    │   ├── Digraph(26)                    → 26 Bags vazias
+    │   └── para cada par de nomes consecutivos:
+    │       ├── indice(x), indice(y)       → letra → 0..25
+    │       ├── existe[u][v]?              → descarta aresta repetida
+    │       └── g.add_edge(u, v) → Bag.add
+    │   ↳ retorna None (caso de prefixo) ──────────→ "Impossible"
+    │
+    ├── Topological(g)
+    │   ├── DirectedCycle(g)
+    │   │   └── para v em 0..25 não marcado:
+    │   │       └── dfs(G, v)          ← DFS 1 (recursiva)
+    │   │           └── para w em G.adj[v]   (Bag → LinkIterator)
+    │   │               ├── não marcado → dfs(G, w)
+    │   │               └── on_stack[w] → monta self.cycle
+    │   ├── has_cycle()?
+    │   │   ├── sim → self.order = None
+    │   │   └── não → DepthFirstOrder(g)
+    │   │             └── para w em 0..25 não marcado:
+    │   │                 └── dfs(G, w)  ← DFS 2 (recursiva)
+    │   │                     └── post.append(v) quando v termina
+    │   │             └── reversePost() → reversed(post)
+    │   │                 → self.order
+    │
+    ├── has_order()?  não ────────────────────────→ "Impossible"
+    ├── restrita[v]: letras que aparecem em alguma aresta
+    └── letras restritas na ordem de `order`
+        + letras livres em ordem alfabética  → "rsabcd…"
+└── print(...)
+```
+
+São executadas **duas DFS**, ambas dentro de `Topological`:
+
+| | DFS 1 — `DirectedCycle.dfs` | DFS 2 — `DepthFirstOrder.dfs` |
+|---|---|---|
+| Estado | `_marked`, `on_stack`, `edge_to` | `marked`, `pre`, `post` |
+| Objetivo | Encontrar aresta para vértice em `on_stack` (ciclo) | Registrar a ordem de término (pós-ordem) |
+| Quando executa | Sempre | Apenas se não houver ciclo |
+
+Uma única DFS poderia fazer as duas tarefas, mas isso exigiria alterar as classes de referência. Mantê-las separadas não muda a complexidade: cada DFS é `O(V + E)`.
 
 ## Implementação de referência
 
@@ -55,7 +102,7 @@ Existe resposta se e somente se o grafo de precedência é um **DAG** (não poss
 
 ## Alterações e justificativas
 
-Nenhuma classe teve a lógica alterada; foram removidos apenas trechos não usados: blocos `__main__`, leitura de grafo por arquivo, `__str__`, métodos auxiliares de `Digraph` e o uso de `SymbolDigraph` em `Topological`. O código específico do problema (`construir_grafo`, `resolver`, `main`) faz a extração das arestas, o teste de prefixo, o descarte de arestas repetidas e a conversão para letras. Detalhes em [`acompanhamento/marco-4.md`](acompanhamento/marco-4.md).
+Nenhuma classe teve a lógica alterada; foram removidos apenas trechos não usados: blocos `__main__`, leitura de grafo por arquivo, `__str__`, métodos auxiliares de `Digraph` e o uso de `SymbolDigraph` em `Topological`. O código específico do problema (`construir_grafo`, `resolver`, `main`) faz a extração das arestas, o teste de prefixo, o descarte de arestas repetidas e a montagem da saída (letras restritas primeiro, depois as livres em ordem alfabética). Detalhes em [`acompanhamento/marco-4.md`](acompanhamento/marco-4.md).
 
 ## Complexidade
 
@@ -66,7 +113,7 @@ Nenhuma classe teve a lógica alterada; foram removidos apenas trechos não usad
 
 - Nome maior antes do seu prefixo (`abc`, `ab`): `Impossible` sem executar a busca.
 - Prefixo válido (`ab`, `abc`): nenhuma aresta.
-- Letras que não aparecem: vértices isolados, entram em qualquer posição.
+- Letras que não aparecem em nenhuma aresta: vértices isolados, sem restrições; são colocadas no final, em ordem alfabética.
 - Um único nome: qualquer permutação é válida.
 - Arestas repetidas: descartadas.
 - Ciclos de qualquer tamanho: `Impossible`.
