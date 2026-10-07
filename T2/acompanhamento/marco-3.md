@@ -30,9 +30,9 @@ O ciclo é reconhecido por DFS usando três estados por vértice: não visitado,
 
 Assim, a propriedade não é apenas que as comparações locais sejam possíveis: todas as relações precisam ser compatíveis globalmente. O caso de prefixo é verificado antes da construção final do grafo porque pode tornar a ordenação impossível sem gerar uma aresta.
 
-## 2. Implementações de referência (`algs4-java`)
+## 2. Implementações de referência (`algs4-py`)
 
-As classes serão consultadas no diretório `algs4-java/algs4` do repositório indicado. Nesta etapa, elas serão usadas como referência ou adaptadas, sem implementar o código da solução.
+As classes serão consultadas no diretório `algs4-py/algs4` do repositório indicado. Nesta etapa, elas serão usadas como referência ou adaptadas, sem implementar o código da solução.
 
 | Classe | Papel na solução | Adaptação prevista |
 |---|---|---|

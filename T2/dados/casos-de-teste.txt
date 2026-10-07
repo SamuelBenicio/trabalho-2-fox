@@ -1,0 +1,139 @@
+# Casos de teste - Fox And Names (Codeforces 510C)
+#
+# Formato de cada caso:
+#   caso: <descrição>
+#   esperado: Impossible | valido
+#   <entrada do problema: n e os n nomes>
+# Os casos são separados por uma linha em branco.
+# "valido" significa que qualquer permutação que ordene os nomes é aceita;
+# a verificação é feita por dados/testar.py.
+
+caso: exemplo 1 do enunciado
+esperado: valido
+3
+rivest
+shamir
+adleman
+
+caso: exemplo 2 do enunciado (ciclo)
+esperado: Impossible
+10
+tourist
+petr
+wjmzbmr
+yeputons
+vepifanov
+scottwu
+oooooooooooooooo
+subscriber
+rowdark
+tankengineer
+
+caso: exemplo 3 do enunciado
+esperado: valido
+10
+petr
+egor
+endagorion
+feferivan
+ilovetanyaromanova
+kostka
+dmitriyh
+maratsnowbear
+bredorjaguarturnik
+cgyforever
+
+caso: exemplo 4 do enunciado (prefixos válidos)
+esperado: valido
+7
+car
+care
+careful
+carefully
+becarefuldontforgetsomething
+otherwiseyouwillbehacked
+goodluck
+
+caso: instância dos marcos 1 e 3
+esperado: valido
+4
+baa
+abcd
+abca
+cab
+
+caso: um único nome
+esperado: valido
+1
+abc
+
+caso: prefixo inválido (nome maior antes do seu prefixo)
+esperado: Impossible
+2
+abc
+ab
+
+caso: prefixo válido (nome menor antes)
+esperado: valido
+2
+ab
+abc
+
+caso: ciclo de tamanho 2
+esperado: Impossible
+3
+ab
+ba
+ac
+
+caso: ciclo de tamanho 3
+esperado: Impossible
+4
+a
+b
+c
+ab
+
+caso: arestas repetidas (a -> b gerada duas vezes)
+esperado: valido
+4
+xa
+xb
+ya
+yb
+
+caso: cadeia com as 26 letras em ordem inversa
+esperado: valido
+26
+z
+y
+x
+w
+v
+u
+t
+s
+r
+q
+p
+o
+n
+m
+l
+k
+j
+i
+h
+g
+f
+e
+d
+c
+b
+a
+
+caso: diferença depois de prefixo comum longo
+esperado: valido
+2
+aaaaaaaaaaz
+aaaaaaaaaay
