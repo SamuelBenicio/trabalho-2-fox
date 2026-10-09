@@ -187,6 +187,7 @@ def construir_grafo(nomes):
         for x, y in zip(s, t):
             if x != y:
                 u, v = indice(x), indice(y)
+                # TODO: put as a method of Digraph class
                 if not existe[u][v]:
                     existe[u][v] = True
                     g.add_edge(u, v)
@@ -199,14 +200,18 @@ def construir_grafo(nomes):
 
 
 def resolver(nomes):
+    
     g = construir_grafo(nomes)
+    # TODO: put validation on graph
     if g is None:
         return "Impossible"
 
     topological = Topological(g)
+    # TODO: put validation on topological
     if not topological.has_order():
         return "Impossible"
 
+    # TODO: put it in a separate method
     # Letras restritas: as que aparecem em alguma aresta.
     restrita = [False] * LETRAS
     for v in range(LETRAS):
