@@ -54,33 +54,34 @@ Existe resposta se e somente se o grafo de precedência é um **DAG** (não poss
 
 ```text
 main()
-└── resolver(nomes)
-    ├── construir_grafo(nomes)
+└── solve(names)
+    ├── build_graph(names)
     │   ├── Digraph(26)                    → 26 Bags vazias
     │   └── para cada par de nomes consecutivos:
-    │       ├── indice(x), indice(y)       → letra → 0..25
-    │       ├── existe[u][v]?              → descarta aresta repetida
-    │       └── g.add_edge(u, v) → Bag.add
-    │   ↳ retorna None (caso de prefixo) ──────────→ "Impossible"
+    │       ├── index(x), index(y)         → letra → 0..25
+    │       ├── graph.has_edge(u, v)?      → descarta aresta repetida
+    │       └── graph.add_edge(u, v) → Bag.add
+    │   ↳ lança ImpossibleOrder (caso de prefixo) ─→ "Impossible"
     │
-    ├── Topological(g)
-    │   ├── DirectedCycle(g)
-    │   │   └── para v em 0..25 não marcado:
-    │   │       └── dfs(G, v)          ← DFS 1 (recursiva)
-    │   │           └── para w em G.adj[v]   (Bag → LinkIterator)
-    │   │               ├── não marcado → dfs(G, w)
-    │   │               └── on_stack[w] → monta self.cycle
-    │   ├── has_cycle()?
-    │   │   ├── sim → self.order = None
-    │   │   └── não → DepthFirstOrder(g)
-    │   │             └── para w em 0..25 não marcado:
-    │   │                 └── dfs(G, w)  ← DFS 2 (recursiva)
-    │   │                     └── post.append(v) quando v termina
-    │   │             └── reversePost() → reversed(post)
-    │   │                 → self.order
+    ├── topological_order(graph)
+    │   └── Topological(graph)
+    │       ├── DirectedCycle(g)
+    │       │   └── para v em 0..25 não marcado:
+    │       │       └── dfs(G, v)          ← DFS 1 (recursiva)
+    │       │           └── para w em G.adj[v]   (Bag → LinkIterator)
+    │       │               ├── não marcado → dfs(G, w)
+    │       │               └── on_stack[w] → monta self.cycle
+    │       ├── has_cycle()?
+    │       │   ├── sim → self.order = None
+    │       │   └── não → DepthFirstOrder(g)
+    │       │             └── para w em 0..25 não marcado:
+    │       │                 └── dfs(G, w)  ← DFS 2 (recursiva)
+    │       │                     └── post.append(v) quando v termina
+    │       │             └── reversePost() → reversed(post)
+    │       │                 → self.order
+    │       └── has_order()?  não → lança ImpossibleOrder ─→ "Impossible"
     │
-    ├── has_order()?  não ────────────────────────→ "Impossible"
-    ├── restrita[v]: letras que aparecem em alguma aresta
+    ├── restricted_letters(graph): letras que aparecem em alguma aresta
     └── letras restritas na ordem de `order`
         + letras livres em ordem alfabética  → "rsabcd…"
 └── print(...)
@@ -102,12 +103,12 @@ Uma única DFS poderia fazer as duas tarefas, mas isso exigiria alterar as class
 
 ## Alterações e justificativas
 
-Nenhuma classe teve a lógica alterada; foram removidos apenas trechos não usados: blocos `__main__`, leitura de grafo por arquivo, `__str__`, métodos auxiliares de `Digraph` e o uso de `SymbolDigraph` em `Topological`. O código específico do problema (`construir_grafo`, `resolver`, `main`) faz a extração das arestas, o teste de prefixo, o descarte de arestas repetidas e a montagem da saída (letras restritas primeiro, depois as livres em ordem alfabética). Detalhes em [`acompanhamento/marco-4.md`](acompanhamento/marco-4.md).
+Nenhuma classe teve a lógica alterada; foram removidos trechos não usados (blocos `__main__`, leitura de grafo por arquivo, `__str__`, métodos auxiliares de `Digraph` e o uso de `SymbolDigraph` em `Topological`) e acrescentado o método `has_edge` em `Digraph`. O código específico do problema (`build_graph`, `topological_order`, `restricted_letters`, `solve`, `main`) faz a extração das arestas, o teste de prefixo, o descarte de arestas repetidas e a montagem da saída (letras restritas primeiro, depois as livres em ordem alfabética). Detalhes em [`acompanhamento/marco-4.md`](acompanhamento/marco-4.md).
 
 ## Complexidade
 
 - **Tempo:** `O(nL + V + E)`, com `V = 26` e `E ≤ n - 1`.
-- **Memória:** `O(V + E)` para o grafo e `O(V² + nL)` auxiliar (matriz de arestas repetidas e nomes lidos).
+- **Memória:** `O(V + E)` para o grafo e `O(nL)` auxiliar (nomes lidos).
 
 ## Casos especiais
 

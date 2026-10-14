@@ -27,23 +27,26 @@ Referência: `algs4-py/algs4`.
 |---|---|---|---|
 | `utils/linklist.py` (`Node`, `LinkIterator`) | Reutilizada sem alterações | — | Dependência de `Bag` |
 | `bag.py` (`Bag`) | Reutilizada com remoções | Removidos `__str__` e o bloco `__main__` | Não são usados pela solução |
-| `digraph.py` (`Digraph`) | Reutilizada com remoções | Removidos a leitura por arquivo (`file=`), `__str__`, `degree`, `max_degree`, `number_of_self_loops`, `reverse` e o bloco `__main__` | O grafo é construído a partir dos nomes, não de um arquivo de arestas; os demais métodos não são usados |
+| `digraph.py` (`Digraph`) | Reutilizada com remoções e um acréscimo | Removidos a leitura por arquivo (`file=`), `__str__`, `degree`, `max_degree`, `number_of_self_loops`, `reverse` e o bloco `__main__`; acrescentado `has_edge(v, w)` | O grafo é construído a partir dos nomes, não de um arquivo de arestas; os demais métodos não são usados; `has_edge` evita arestas repetidas |
 | `directed_cycle.py` (`DirectedCycle`) | Reutilizada com remoções | Removido o bloco `__main__` | Lógica da DFS com `on_stack` mantida integralmente |
 | `depth_first_order.py` (`DepthFirstOrder`) | Reutilizada com remoções | Removido o bloco `__main__` | Lógica da pós-ordem mantida integralmente |
 | `topological.py` (`Topological`) | Reutilizada com remoções | Removidos o import de `SymbolDigraph` e o bloco `__main__` | Os vértices já são índices `0..25`; não há necessidade de tabela de símbolos |
 
-**Nenhuma classe teve a lógica do algoritmo alterada.** Todas as modificações são remoções de código que não é usado no problema.
+**Nenhuma classe teve a lógica do algoritmo alterada.** As modificações são remoções de código que não é usado no problema e o acréscimo de `Digraph.has_edge`, que não altera nenhum método existente.
 
 ### Código específico do problema
 
 | Função | Papel |
 |---|---|
-| `indice(c)` | Converte a letra em índice (`a` → 0, …, `z` → 25) |
-| `construir_grafo(nomes)` | Compara nomes consecutivos, cria as arestas e detecta o caso de prefixo (retorna `None`) |
-| `resolver(nomes)` | Decide entre `Impossible` e a ordem topológica, e monta a saída: letras restritas na ordem topológica, depois as livres em ordem alfabética |
+| `index(c)` | Converte a letra em índice (`a` → 0, …, `z` → 25) |
+| `letter(v)` | Converte o índice de volta para a letra (`0` → `a`, …, `25` → `z`) |
+| `build_graph(names)` | Compara nomes consecutivos, cria as arestas e detecta o caso de prefixo (lança `ImpossibleOrder`) |
+| `topological_order(graph)` | Executa `Topological` e devolve a ordem; se há ciclo, lança `ImpossibleOrder` |
+| `restricted_letters(graph)` | Marca as letras que aparecem em alguma aresta |
+| `solve(names)` | Captura `ImpossibleOrder` e responde `Impossible`; caso contrário, monta a saída: letras restritas na ordem topológica, depois as livres em ordem alfabética |
 | `main()` | Lê a entrada e imprime a resposta |
 
-Em `construir_grafo`, uma matriz `existe[26][26]` impede arestas repetidas, conforme previsto nos marcos 1 e 3. Essa verificação fica fora de `Digraph` para não alterar a classe de referência. Sem ela a resposta continuaria correta, pois arestas paralelas não criam ciclos nem mudam a ordem topológica; a matriz apenas mantém o grafo simples.
+Em `build_graph`, `Digraph.has_edge(u, v)` impede arestas repetidas, conforme previsto nos marcos 1 e 3. O método percorre a lista de adjacência de `u` (no máximo 25 vizinhos), sem estado extra na classe. Sem essa verificação a resposta continuaria correta, pois arestas paralelas não criam ciclos nem mudam a ordem topológica; ela apenas mantém o grafo simples.
 
 ## 3. Diferenças em relação aos marcos anteriores
 
@@ -51,7 +54,7 @@ Em `construir_grafo`, uma matriz `existe[26][26]` impede arestas repetidas, conf
 - **`Stack`:** no `algs4-py`, `DepthFirstOrder` usa `collections.deque` para guardar a pós-ordem, e `reversePost()` a percorre ao contrário. Não há classe `Stack` separada.
 - **DFS em vez de Kahn:** o Marco 1 mencionava a possibilidade de usar BFS/Kahn. A escolha final foi a DFS, pois `Topological` do `algs4` é baseada em DFS e reúne em uma única classe a detecção de ciclo e a ordenação.
 - **Saída da instância do Marco 3:** o rastreamento do Marco 3 apresentou *uma* ordem válida (`bdacefgh…`). A implementação imprime `dbacefghijklmnopqrstuvwxyz`. Ambas respeitam `b -> a`, `d -> a` e `a -> c`; o problema aceita qualquer permutação válida.
-- **Saída com letras restritas primeiro:** a pós-ordem reversa coloca as letras isoladas antes e em ordem invertida (ex.: `zyxwvutrsq…a` no exemplo 1). Para uma saída mais legível, `resolver` mantém da ordem topológica apenas as letras que aparecem em alguma aresta e acrescenta as demais em ordem alfabética (ex.: `rsabcd…`). Isso é válido porque toda aresta liga duas letras restritas, cuja ordem relativa é preservada, e as letras livres não têm restrições. As classes de referência não foram alteradas.
+- **Saída com letras restritas primeiro:** a pós-ordem reversa coloca as letras isoladas antes e em ordem invertida (ex.: `zyxwvutrsq…a` no exemplo 1). Para uma saída mais legível, `solve` mantém da ordem topológica apenas as letras que aparecem em alguma aresta e acrescenta as demais em ordem alfabética (ex.: `rsabcd…`). Isso é válido porque toda aresta liga duas letras restritas, cuja ordem relativa é preservada, e as letras livres não têm restrições. As classes de referência não foram alteradas para isso.
 - **Ordem das adjacências:** `Bag` insere no início da lista, então `adj(v)` é percorrida na ordem inversa de inserção. Isso altera qual ordem válida é produzida, mas não a correção.
 
 ## 4. Testes
@@ -91,7 +94,7 @@ Mantém-se a análise do Marco 3:
 
 - **Tempo:** `O(nL + V + E)`, com `n ≤ 100`, `L ≤ 100`, `V = 26` e `E ≤ n - 1` arestas distintas.
 - **Memória do grafo:** `O(V + E)` nas listas de adjacência.
-- **Memória auxiliar:** `O(V²)` para a matriz `existe` (676 posições, constante), `O(V)` para `marked`, `on_stack`, `edge_to`, pós-ordem e pilha de recursão, e `O(nL)` para os nomes lidos.
+- **Memória auxiliar:** `O(V)` para `marked`, `on_stack`, `edge_to`, pós-ordem e pilha de recursão, e `O(nL)` para os nomes lidos.
 
 A recursão da DFS tem profundidade máxima 26, bem abaixo do limite padrão do Python.
 

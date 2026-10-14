@@ -2,19 +2,19 @@
 Fox And Names - Codeforces 510C
 https://codeforces.com/problemset/problem/510/C
 
-Execução:  python3 src/main.py < dados/entrada.txt
+Usage:  python3 src/main.py < dados/entrada.txt
 
-As classes Node, LinkIterator, Bag, Digraph, DirectedCycle, DepthFirstOrder e
-Topological são cópias das implementações de referência de algs4-py, reunidas
-em um único arquivo porque o Codeforces aceita apenas um arquivo por submissão.
-As alterações em relação à referência estão descritas em acompanhamento/marco-4.md.
+The classes Node, LinkIterator, Bag, Digraph, DirectedCycle, DepthFirstOrder and
+Topological are copies of the algs4-py reference implementations, gathered in a
+single file because Codeforces accepts only one file per submission.
+The changes relative to the reference are described in acompanhamento/marco-4.md.
 """
 
 import sys
 from collections import deque
 
 
-# --- algs4/utils/linklist.py (sem alterações) ---
+# --- algs4/utils/linklist.py (unchanged) ---
 
 class Node:
 
@@ -37,7 +37,7 @@ class LinkIterator:
             return item
 
 
-# --- algs4/bag.py (removidos: __str__ e o bloco __main__) ---
+# --- algs4/bag.py (removed: __str__ and the __main__ block) ---
 
 class Bag:
 
@@ -60,8 +60,9 @@ class Bag:
         self.n += 1
 
 
-# --- algs4/digraph.py (removidos: leitura por arquivo, __str__, degree,
-#     max_degree, number_of_self_loops, reverse e o bloco __main__) ---
+# --- algs4/digraph.py (removed: reading from file, __str__, degree,
+#     max_degree, number_of_self_loops, reverse and the __main__ block;
+#     added: has_edge) ---
 
 class Digraph:
 
@@ -75,8 +76,11 @@ class Digraph:
         self.adj[v].add(w)
         self.E += 1
 
+    def has_edge(self, v, w):
+        return any(x == w for x in self.adj[v])
 
-# --- algs4/directed_cycle.py (removido: o bloco __main__) ---
+
+# --- algs4/directed_cycle.py (removed: the __main__ block) ---
 
 class DirectedCycle:
 
@@ -117,7 +121,7 @@ class DirectedCycle:
         return self.cycle is not None
 
 
-# --- algs4/depth_first_order.py (removido: o bloco __main__) ---
+# --- algs4/depth_first_order.py (removed: the __main__ block) ---
 
 class DepthFirstOrder:
 
@@ -145,7 +149,7 @@ class DepthFirstOrder:
         return self.reverse_post()
 
 
-# --- algs4/topological.py (removidos: import de SymbolDigraph e o bloco __main__) ---
+# --- algs4/topological.py (removed: SymbolDigraph import and the __main__ block) ---
 
 class Topological:
     def __init__(self, g):
@@ -159,83 +163,90 @@ class Topological:
         return self.order != None
 
 
-# --- Código específico do problema ---
+# --- Problem-specific code ---
 
-LETRAS = 26
+LETTERS = 26
+IMPOSSIBLE = "Impossible"
 
 
-def indice(c):
-    """Converte a letra no índice do vértice: 'a' -> 0, ..., 'z' -> 25."""
+class ImpossibleOrder(Exception):
+    """No alphabet order makes the names sorted."""
+
+
+def index(c):
+    """Converts a letter to its vertex index: 'a' -> 0, ..., 'z' -> 25."""
     return ord(c) - ord('a')
 
 
-def letra(v):
-    """Converte o índice do vértice de volta para a letra: 0 -> 'a', ..., 25 -> 'z'."""
+def letter(v):
+    """Converts a vertex index back to its letter: 0 -> 'a', ..., 25 -> 'z'."""
     return chr(ord('a') + v)
 
 
-def construir_grafo(nomes):
-    """Cria o dígrafo de precedência das letras a partir de nomes consecutivos.
+def build_graph(names):
+    """Builds the letter precedence digraph from consecutive names.
 
-    Retorna None quando um nome aparece antes de um prefixo seu, caso que
-    nenhuma ordem do alfabeto resolve.
+    Raises ImpossibleOrder when a name appears before one of its prefixes,
+    a case no alphabet order can fix.
     """
-    g = Digraph(LETRAS)
-    existe = [[False] * LETRAS for _ in range(LETRAS)]  # evita arestas repetidas
+    graph = Digraph(LETTERS)
 
-    for s, t in zip(nomes, nomes[1:]):
+    for s, t in zip(names, names[1:]):
         for x, y in zip(s, t):
             if x != y:
-                u, v = indice(x), indice(y)
-                # TODO: put as a method of Digraph class
-                if not existe[u][v]:
-                    existe[u][v] = True
-                    g.add_edge(u, v)
+                u, v = index(x), index(y)
+                if not graph.has_edge(u, v):  # keeps the graph simple
+                    graph.add_edge(u, v)
                 break
         else:
-            # nenhuma posição diferente: um nome é prefixo do outro
+            # no differing position: one name is a prefix of the other
             if len(s) > len(t):
-                return None
-    return g
+                raise ImpossibleOrder()
+    return graph
 
 
-def resolver(nomes):
-    
-    g = construir_grafo(nomes)
-    # TODO: put validation on graph
-    if g is None:
-        return "Impossible"
+def topological_order(graph):
+    """Returns a topological order of the graph.
 
-    topological = Topological(g)
-    # TODO: put validation on topological
+    Raises ImpossibleOrder when the graph has a cycle (contradictory constraints).
+    """
+    topological = Topological(graph)
     if not topological.has_order():
-        return "Impossible"
+        raise ImpossibleOrder()
+    return topological.order
 
-    # TODO: put it in a separate method
-    # Letras restritas: as que aparecem em alguma aresta.
-    restrita = [False] * LETRAS
-    for v in range(LETRAS):
-        for w in g.adj[v]:
-            restrita[v] = True
-            restrita[w] = True
 
-    # Primeiro as letras restritas, na ordem topológica (preserva as arestas);
-    # depois as letras livres, em ordem alfabética (não têm restrições).
-    alfabeto = []
-    for v in topological.order:
-        if restrita[v]:
-            alfabeto.append(letra(v))
-    for v in range(LETRAS):
-        if not restrita[v]:
-            alfabeto.append(letra(v))
-    return "".join(alfabeto)
+def restricted_letters(graph):
+    """Marks the letters that appear in some edge."""
+    restricted = [False] * LETTERS
+    for v in range(LETTERS):
+        for w in graph.adj[v]:
+            restricted[v] = True
+            restricted[w] = True
+    return restricted
+
+
+def solve(names):
+    try:
+        graph = build_graph(names)
+        order = topological_order(graph)
+    except ImpossibleOrder:
+        return IMPOSSIBLE
+
+    restricted = restricted_letters(graph)
+
+    # First the restricted letters, in topological order (preserves the edges);
+    # then the free letters, in alphabetical order (they have no constraints).
+    alphabet = [letter(v) for v in order if restricted[v]]
+    alphabet += [letter(v) for v in range(LETTERS) if not restricted[v]]
+    return "".join(alphabet)
 
 
 def main():
-    dados = sys.stdin.read().split()
-    n = int(dados[0])
-    nomes = dados[1:1 + n]
-    print(resolver(nomes))
+    data = sys.stdin.read().split()
+    n = int(data[0])
+    names = data[1:1 + n]
+    print(solve(names))
 
 
 if __name__ == '__main__':
